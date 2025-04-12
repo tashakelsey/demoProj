@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cheerleader Nutrition Game</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f8f9fa;
+            text-align: center;
+        }
+        .game-container {
+            background: white;
+            padding: 40px 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            max-width: 450px;
+            margin: 5% auto;
+        }
+        
+        img {width: 100%;border-radius: 10px;}
+        .btn {
+            width: 100%;
+            font-size: 18px;
+            padding: 12px;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+        .btn-healthy {background-color: #28a745;color: white;}
+        .btn-unhealthy {background-color: #dc3545;color: white;}
+        .btn:hover {opacity: 0.8;}
+       /* Popup styling */
+/* Popup styling */
+#popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.8);
+    width: 80%;
+    max-width: 400px;
+    background: white;
+    padding: 30px;  /* Increased padding for more space */
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    opacity: 0;
+    transition: 0.3s ease-in-out;
+    visibility: hidden;
+    height: 60%;  /* Increased height */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;  /* Ensure buttons stay at the bottom */
+}
+
+#popup.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translate(-50%, -50%) scale(1);
+}
+scale(1);}
+        .correct {color: green;font-weight: bold;}
+        .wrong {color: red;font-weight: bold;}
+        /* Summary Styling */
+        #summary {
+            text-align: left;
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            margin: auto;
+            display: none;
+        }
+        #summary p {font-size: 16px;margin-bottom: 10px;}
+        #character-dialog img {border-radius: 15px;}
+        #character-dialog .alert {max-width: 400px;margin: 0 auto;font-size: 16px;padding: 15px;}
+        #character-dialog-text {
+            display: inline-block;
+            transform: translateX(-50%);
+            z-index: 1;
+            max-width: 250px; /* Optional: To avoid the text from overflowing */
+            font-size: 14px;   /* Adjust font size for clarity */
+        }
+        .speech-bubble {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #f0f0f0;
+    border-radius: 15px;
+    padding: 10px;
+    max-width: 90%;
+    margin: 0 auto;
+    box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.1);
+    z-index: 10;
+    text-align: center;
+}
+
+.speech-bubble::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 10px;
+    border-style: solid;
+    border-color: #f0f0f0 transparent transparent transparent;
+}
+
+/* Buttons container styling */
+#popup .buttons-container {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;  /* Adjust space between buttons */
+    width: 100%;
+    align-items: center; /* Align buttons vertically if needed */
+}
+
+#popup .buttons-container button {
+    width: 48%;  /* Ensure buttons have equal width */
+    padding: 12px 0; /* Adjust padding for consistency */
+}
+.alert-success.speech-bubble {
+        background-color: #d4edda;
+        border-color: #c3e6cb;
+    }
+        .alert-success.speech-bubble::after {
+            border-top-color: #d4edda;
+        }
+
+         .alert-danger.speech-bubble {
+        background-color: #f8d7da;
+        border-color: #f5c6cb;
+    }
+        .alert-danger.speech-bubble::after {
+            border-top-color: #f8d7da;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .game-container {padding: 20px;}
+            .btn {font-size: 16px;padding: 10px;}
+            #popup {width: 90%;max-width: 350px;}
+            #summary {width: 90%;}
+        }
+
+        @media (max-width: 480px) {
+            body {font-size: 14px;}
+            .game-container {margin-top: 30px;}
+            .btn {font-size: 14px;padding: 8px;}
+            #popup {width: 90%;max-width: 300px;padding: 15px;}
+            #summary {font-size: 14px;}
+            h1 {font-size: 18px;}
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- Name Input Screen -->
+    <div class="game-container" id="name-input-container">
+        <h1>Enter Your Name</h1>
+        <div class="input-group mb-3">
+            <input type="text" id="player-name" class="form-control" placeholder="Your Name">
+        </div>
+        <button class="btn btn-primary" onclick="startGame()">Start</button>
+    </div>
+<!-- Popup -->
+<div id="popup">
+    <img id="character-img" src="skinny.png" alt="Character" class="img-fluid mb-3" style="max-height: 120px;" />
+    <div id="character-dialog-text" class="speech-bubble alert alert-success mb-3" style="display: none;"></div>
+    <p id="popup-text" class="mt-3"></p>
+    <div class="buttons-container">
+        <button id="next-btn" class="btn btn-secondary mt-2" onclick="nextQuestion()" style="display: none;">Next</button>
+        <button class="btn btn-danger mt-2" onclick="restartGame()">Restart</button>
+    </div>
+</div>
+<!-- Game Container -->
+    <div class="game-container container" id="game-container" style="display: none; max-width: 500px;">
+        <!-- Character and Dialog above name/score -->
+        <div id="player-display" class="fw-bold mb-3" style="font-size: 20px;"></div>
+
+        <!-- Player Info -->
+        <h4 id="lives">❤️ Lives: 3</h4>
+        <h4 id="score">⭐ Score: 0</h4>
+
+        <div class="row align-items-center mt-4">
+            <!-- Food Image -->
+            <div class="col-md-12 text-center mb-3 mb-md-0">
+                <img id="food-image" src="" alt="Food Image" class="img-fluid rounded" style="max-height: 300px;" />
+            </div>
+        </div>
+
+        <!-- Answer Buttons -->
+        <div class="mt-4">
+            <button class="btn btn-healthy" onclick="checkAnswer(true)">Healthy</button>
+            <button class="btn btn-unhealthy mt-2" onclick="checkAnswer(false)">Unhealthy</button>
+        </div>
+    </div>
+    <!-- Summary -->
+    <div id="summary">
+        <h2>Game Summary</h2>
+        <p id="summary-text"></p>
+        <button class="btn btn-warning mt-2" onclick="restartGame()">Restart</button>
+    </div>
+
+    <script>
+        const foods = [
+    { name: "Banana", img: "banana.jpg", isHealthy: true, info: "Bananas are a great source of potassium and natural energy, perfect before a cheer routine." },
+    { name: "Avocado", img: "avocado.jpg", isHealthy: true, info: "Avocados provide healthy fats and fiber, helping with sustained energy and muscle function." },
+    { name: "Chips", img: "chips.jpg", isHealthy: false, info: "Chips are high in sodium and unhealthy fats, which can lead to dehydration and fatigue." },
+    { name: "Coke", img: "coke.jpg", isHealthy: false, info: "Coke is full of sugar and offers no nutritional benefit, causing energy crashes." },
+    { name: "Fries", img: "fries (2).jpg", isHealthy: false, info: "Fries are loaded with trans fats and sodium, which can make athletes feel sluggish." },
+    { name: "Hotdog", img: "hotdog.jpg", isHealthy: false, info: "Hotdogs contain preservatives and saturated fat, which can slow down recovery and performance." },
+    { name: "Rice", img: "rice.jpg", isHealthy: true, info: "Rice is a good source of complex carbohydrates that provide lasting energy for cheering activities." },
+    { name: "Yogurt", img: "yogurt.png", isHealthy: true, info: "Yogurt contains probiotics, protein, and calcium, all supporting digestive and bone health." },
+    { name: "Doughnut", img: "dougnut.jpg", isHealthy: false, info: "Doughnuts are packed with sugar and fats, leading to quick energy spikes and crashes." },
+    { name: "Egg", img: "egg.jpg", isHealthy: true, info: "Eggs are a great source of protein and essential nutrients that support muscle building and energy." }
+];
+
+    let playerName = "";
+    let score = 0;
+    let lives = 3;
+    let currentFoodIndex = 0;
+    let answers = [];
+    let shuffledFoods = [];
+function startGame() {
+    playerName = document.getElementById("player-name").value || "Player";
+    alert(`Welcome, ${playerName}! The game will start now.`);
+    document.getElementById("player-display").textContent = `👤 ${playerName}`;
+    document.getElementById("name-input-container").style.display = "none";
+    document.getElementById("game-container").style.display = "block";
+
+    shuffledFoods = [...foods]; // Use all foods in order
+    loadFood();
+}
+function loadFood() {
+    if (lives <= 0 || currentFoodIndex >= shuffledFoods.length) {
+        showSummary();
+        return;
+    }
+
+    document.getElementById("food-image").src = shuffledFoods[currentFoodIndex].img;
+}
+function checkAnswer(playerChoice) {
+    let food = shuffledFoods[currentFoodIndex];
+    let correctChoice = food.isHealthy;
+    let result = playerChoice === correctChoice ? "Correct" : "Wrong";
+
+    if (correctChoice === playerChoice) {
+        score++;
+        showPopup(`${result}! ${food.info}`, true);
+    } else {
+        lives--;
+        document.getElementById("lives").textContent = `❤️ Lives: ${lives}`;
+        showPopup(`${result}! ${food.info}`, false);
+    }
+    answers.push(`${food.name}: ${result} - ${food.info}`);
+    document.getElementById("score").textContent = `⭐ Score: ${score}`;
+}
+function showPopup(message, isCorrect) {
+    const characterImg = document.getElementById("character-img");
+    const dialogText = document.getElementById("character-dialog-text");
+
+    characterImg.style.display = "block";
+    dialogText.style.display = "block";
+
+    if (isCorrect) {
+        characterImg.src = "skinny.png";
+        dialogText.className = "speech-bubble alert alert-success";
+        dialogText.innerHTML = `Yes! I'm Healthy.<br>${message}`;
+    } else {
+        characterImg.src = "fat.png";
+        dialogText.className = "speech-bubble alert alert-danger";
+        dialogText.innerHTML = `I'm getting fat.<br>${message}`;
+    }
+
+    document.getElementById("popup").classList.add("show");
+    document.getElementById("next-btn").style.display = "block";
+}
+function nextQuestion() {
+    document.getElementById("popup").classList.remove("show");
+    document.getElementById("next-btn").style.display = "none";
+    
+    // Hide dialog again
+    document.getElementById("character-dialog-text").style.display = "none";
+
+    currentFoodIndex++;
+    if (currentFoodIndex < shuffledFoods.length) {
+        loadFood();
+    } else {
+        showSummary();
+    }
+}
+function showSummary() {
+    const totalQuestions = shuffledFoods.length;
+    const percentage = (score / totalQuestions) * 100;
+    let message = percentage < 50 ? "Try Again" : "Nice Job!";
+    let summaryText = `<strong>${playerName}'s Score: ${score}</strong><br><br><strong>${message}</strong>`;
+    document.getElementById("popup-text").innerHTML = summaryText;
+
+    // Hide the image/dialog inside the popup for summary
+    document.getElementById("character-img").style.display = "none";
+    document.getElementById("character-dialog-text").style.display = "none";
+
+    document.getElementById("next-btn").style.display = "none";
+    document.getElementById("popup").classList.add("show");
+}
+
+function restartGame() {
+    // Reset score and lives
+    score = 0;
+    lives = 3;
+    currentFoodIndex = 0;
+    answers = [];
+
+    document.getElementById("score").textContent = `⭐ Score: ${score}`;
+    document.getElementById("lives").textContent = `❤️ Lives: ${lives}`;
+
+    document.getElementById("popup").classList.remove("show");
+    document.getElementById("summary").classList.remove("show");
+    document.getElementById("game-container").style.display = "block";
+
+    document.getElementById('character-dialog-text').style.display = 'none';
+
+
+    shuffledFoods = [...foods];
+
+    loadFood();
+}
+    </script>
+</body>
+</html>
